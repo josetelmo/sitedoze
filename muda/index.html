@@ -344,7 +344,7 @@ const LEVELS=[
 },
 { name:'ESTUFA', card:'Estufa e Poço de Ventilação', theme:'green', w:48,h:40, start:[4,37],
   grid:b=>{
-    b.fill(2,2,45,37,'.');
+    b.fill(2,5,45,37,'.');
     b.fill(2,30,6,30,'#');b.fill(3,31,5,37,'U');
     b.set(8,37,'B');
     b.set(13,37,'P');b.set(27,37,'P');
@@ -352,14 +352,14 @@ const LEVELS=[
     b.fill(17,31,21,31,'-');b.set(20,30,'w');
     b.fill(10,28,14,28,'-');b.set(10,27,'F');
     b.fill(17,25,21,25,'-');
-    b.set(26,20,'G');b.set(32,11,'G');
-    b.fill(35,11,45,11,'#');b.fill(35,12,45,37,'#');
-    b.fill(35,7,36,10,'S');
-    b.set(38,10,'c');b.fill(41,2,41,10,'3');b.fill(44,9,44,10,'X');
+    b.set(26,20,'G');b.set(30,13,'G');
+    b.fill(35,13,45,13,'#');b.fill(35,14,45,37,'#');
+    b.fill(35,9,36,12,'S');
+    b.set(38,12,'c');b.fill(41,5,41,12,'3');b.fill(44,11,44,12,'X');
     b.fill(22,33,33,33,'-');b.set(31,32,'w');
   },
-  guards:[[24,37,-1]], cams:[[39,2,1.6,112]],
-  decor:[{t:'banner',x:7,y:21,w:6,s:'ESTUFA B2'},{t:'banner',x:35,y:4,w:5,s:'SAÍDA'},{t:'vines',x:9,y:2},{t:'vines',x:16,y:2},{t:'vines',x:23,y:2},{t:'vines',x:29,y:2}],
+  guards:[[24,37,-1]], cams:[[39,5,1.6,85]],
+  decor:[{t:'banner',x:7,y:21,w:6,s:'ESTUFA B2'},{t:'banner',x:35,y:7,w:5,s:'SAÍDA'},{t:'vines',x:9,y:5},{t:'vines',x:16,y:5},{t:'vines',x:23,y:5},{t:'vines',x:29,y:5}],
   hints:[[0,9,'A estufa do Setor 9. A saída fica lá no alto.'],
          [10,22,'Plataformas finas: dá para subir por baixo delas.'],
          [23,34,'Encadeie cipós: aperte [V] de novo enquanto pendurada.'],
@@ -862,7 +862,10 @@ function update(){
   for(let i=floats.length-1;i>=0;i--){const f=floats[i];f.t--;f.y+=f.vy||-0.25;if(f.t<=0)floats.splice(i,1);}
   for(let i=rings.length-1;i>=0;i--){rings[i].t++;if(rings[i].t>36)rings.splice(i,1);}
   if(lv&&P&&scene==='play'){
-    const tx=clampCamX(P.x+4-W/2+P.face*20),ty=clampCamY(P.y-H/2+14);
+    let fy=P.y+14,fx=P.x+4+P.face*20;
+    if(P.state==='hang'||P.state==='zip'){const na=P.state==='hang'?findAnchor(P.anchor):null;
+      if(na){fy=(P.y+na.y*T)/2-6;fx=(P.x+na.x*T)/2+12;}else fy=P.y-22;}
+    const tx=clampCamX(fx-W/2),ty=clampCamY(fy-H/2);
     camX+=(tx-camX)*0.1;camY+=(ty-camY)*0.1;
   }
   if(shake>0)shake--;
@@ -938,7 +941,9 @@ function renderPlay(){
       if((tick+tx*7)%23<2){R(X+(tx*3+tick)%13,Y-4,2,6,'#d8f4ff');R(X+(tx*5+tick)%11,Y-2,4,1,'#d8f4ff');}}
   }
   // vine target
-  if(mode==='play'&&P.state==='normal'&&energy>=12){const a=findAnchor(null);if(a){const X=a.x*U-OX,Y=a.y*U-OY,o=tick%30<15?0:1;
+  if(mode==='play'&&(P.state==='normal'||P.state==='hang')&&energy>=12){const a=findAnchor(P.state==='hang'?P.anchor:null);if(a){const X=a.x*U-OX,Y=a.y*U-OY,o=tick%30<15?0:1;
+    if(X<-8||X>SW-8||Y<-8||Y>SH-8){const ex=Math.max(14,Math.min(SW-14,X+8)),ey=Math.max(70,Math.min(SH-40,Y+8)),ang=Math.atan2(Y+8-ey,X+8-ex);
+      ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);ctx.fillStyle='#5ff2d0';ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-4,-6);ctx.lineTo(-1,0);ctx.lineTo(-4,6);ctx.closePath();ctx.fill();ctx.restore();}
     ctx.strokeStyle='rgba(95,242,208,0.85)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(X+8,Y+8,11+o,0,Math.PI*2);ctx.stroke();
     R(X-4-o,Y+7,4,2,'#5ff2d0');R(X+16+o,Y+7,4,2,'#5ff2d0');R(X+7,Y-4-o,2,4,'#5ff2d0');R(X+7,Y+16+o,2,4,'#5ff2d0');}}
   // view cones
